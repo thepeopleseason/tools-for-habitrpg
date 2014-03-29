@@ -16,24 +16,24 @@ https://github.com/Alys/tools-for-habitrpg/blob/master/habitrpg_user_data_displa
 AND required JavaScript libraries:
 https://github.com/Alys/tools-for-habitrpg/blob/master/js--for--habitrpg_user_data_display.tar.gz
 
-https://oldgods.net/habitrpg/habitrpg_user_data_display.html 
+https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     or http://is.gd/hrpguserdata
 
--->
+->
 
 
 <!-- ---------------------------------------------------------------
-///// 
-///// 
+/////
+/////
 ///// IMPORTANT NOTE TO PROGRAMMERS EDITING THIS PAGE:
-///// 
+/////
 ///// Do not add ANY features to this page which can modify a user's
-///// account (at least not without making large changes to 
+///// account (at least not without making large changes to
 ///// "Privacy and security notes" and "Suspected Bugs", both of
 ///// which currently promise users that their accounts will not
 ///// be changed by this page).
-///// 
-///// 
+/////
+/////
 --------------------------------------------------------------- -->
 
 
@@ -62,7 +62,7 @@ var collectionDrops = false; // control Drops + Quest Progress opening
 // (e.g., Notepad) to add your ID and Token just below here between
 // the quote marks.
 // Once you have done that, do NOT SHARE THE EDITED FILE WITH ANYONE!
-// Your token is a password. If anyone discovers your token, they 
+// Your token is a password. If anyone discovers your token, they
 // can log into your account and make you die over and over and over
 // again and again and again.
 // Also, if you do add your ID and Token here, this page's behaviour
@@ -70,14 +70,15 @@ var collectionDrops = false; // control Drops + Quest Progress opening
 // time you reload the page or click on the "clear my data" link.
 // EDIT THIS FILE AT YOUR OWN RISK! You are responsible for your
 // own changes.
-// You can leave your edited file on your computer and run it in a
-// browser from there, but that will cause your token to be sent
-// unencrypted over the internet, which is a security risk.
-// It is MUCH more secure to upload it to your own HTTPS web server,
-// if you have one (or to a trusted friend's).
-var userId   = '';
-var apiToken = '';
+var userId;
+var apiToken;
 
+if (localStorage.hrpg_userid) {
+   userId = localStorage.hrpg_userid;
+}
+if (localStorage.hrpg_apitoken) {
+   apiToken = localStorage.hrpg_apitoken;
+}
 
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
@@ -118,13 +119,6 @@ $(document).ready(function() {
     }
 
     if (userId && apiToken) {
-        /* This is only executed if the user has edited this file
-           to hard-code their User ID and API Token into the variable
-           declarations above. It fetches the user's data (no need to
-           manually submit the API connection form), and also inserts the
-           uid and token into the form, in case the user later
-           chooses to view the form.
-        */
         fetchData();
         $('#userId').val(userId);
         $('#apiToken').val(apiToken);
@@ -231,6 +225,10 @@ function toggleVisibilityForStuff() {
 function fetchData() {
     dataFetchStatus = 'not attempted'; // but is about to be...
     toggleVisibilityForStuff();
+    if ($("#localSave")[0].checked) {
+        localStorage.setItem("hrpg_userid", userId);
+        localStorage.setItem("hrpg_apitoken", apiToken);
+    }
     $("#loading").show();
     $.when($.ajax({
         url: serverUrl + serverPathUser,
@@ -318,22 +316,22 @@ function displayData(data) {
         // on a quest:
         // "quest":{"completed":null,"key":"ghost_stag",
         //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
-        // 
+        //
         // on a collection quest but found nothing yet:
         // "quest":{"completed":null,"key":"vice2","progress":{"collect":
         //          {"lightCrystal":0},"down":0,"up":0}},
-        // 
+        //
         // on a collection quest and found stuff:
         // "quest":{"completed":null,"key":"vice2","progress":{"collect":
         //          {"lightCrystal":2},"down":0,"up":2.4434153558001794}},
-        // 
+        //
         // not on a quest:
         // "quest":{"progress":{"collect":{},"down":0,"up":0}},
-        // 
+        //
         // before the user has ever joined a party or started a quest:
         // "party":{"current":null,"invitation":null,"quest":
         // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
-        // 
+        //
         var msg = '';
         var progressObj = $.extend({}, data.party.quest.progress);
         if (jQuery.isEmptyObject(progressObj.collect)) {
@@ -439,7 +437,7 @@ function displayData(data) {
         'aaData': allTasksArray,
         'aoColumns': [
     { 'mData' : 'order', // needed to ensure correst starting sort
-      'sTitle': '#',    'bVisible': false, 
+      'sTitle': '#',    'bVisible': false,
     },
     { 'mData' : 'type',       'sClass': 'center',
       'sTitle': 'type',       'sWidth': '10%',
@@ -517,7 +515,7 @@ function displayData(data) {
         'bPaginate': false,
         'bDeferRender': true,
         // 'bSortClasses': false,
-        "sScrollX": "100%", 
+        "sScrollX": "100%",
         // "sScrollXInner": "200%",
         "bDestroy": true, // allows table to recreate if Fetch Data is repeated
         'oColumnFilterWidgets': {
@@ -597,7 +595,7 @@ function displayData(data) {
         }
         else {
             historyList.reverse(); // put most recent at top (we couldn't
-                   // do this earlier when we sorted the items because the 
+                   // do this earlier when we sorted the items because the
                    // 'buttonUsed' code needed them in chronological order
             habitText += "<ul>" + historyList.join("") + "</ul>";
         }
@@ -713,7 +711,7 @@ function convertGearKeysToNames(keys) {
     // names for the equipment. If we are fetching this content,
     // it's only so that we can make nicer messages for the user.
     // Thus if fetching the content fails, we ignore the problem,
-    // and put up with showing slightly less-nice messages to the 
+    // and put up with showing slightly less-nice messages to the
     // user. This is better than forcing the user to see and try
     // to deal with fetch errors.
     return $.when($.ajax({
@@ -965,7 +963,7 @@ h2 {
 #taskOverviewTable {
     width: 100%;
     table-layout: fixed;
-    word-wrap: break-word;  
+    word-wrap: break-word;
 }
 #taskOverviewTable .sorting_1,
 #taskOverviewTable .sorting_2,
@@ -1164,7 +1162,7 @@ h2 {
 
     <div class="tocSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
-        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.  
+        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.
 <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. -->
 Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.
 </p>
@@ -1221,6 +1219,8 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <label for="apiToken"><span>API Token</span>
             <input type="password" name="apiToken" id="apiToken" />
         </label>
+        <label for="localSave">Save my information in my browser</label>
+        <input type="checkbox" name="lSave" id="localSave" />
         <input type="submit" value="Fetch My Data">
         <p class="highlight">Privacy and security notes:</p>
         <ul>
@@ -1231,7 +1231,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         They are not sent anywhere else.
         To confirm that, you can ask someone who knows the JavaScript
         programming language to examine the source of this page.</li>
-        <li>This page does not save your User ID and API Token to any 
+        <li>This page does not save your User ID and API Token to any
         location, but your browser might, if it has been configured to
         save form and password information. If you are using this page
         on a shared computer, you should clear any data that the browser
